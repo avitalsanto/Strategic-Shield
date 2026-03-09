@@ -1554,9 +1554,9 @@ function draw() {
 
     // Touch crosshair
     if (mobile.touching && mobile.targetAngle !== null && ship && gameActive) {
-        const touchIds = Object.keys(activeTouches);
+        const touchIds = Object.keys(touchState);
         if (touchIds.length > 0) {
-            const t = activeTouches[touchIds[0]];
+            const t = touchState[touchIds[0]];
             ctx.save();
             ctx.translate(t.x, t.y);
             ctx.globalAlpha = 0.4;
