@@ -501,7 +501,7 @@ function playSound(type) {
 
 // ===== GAME STATE =====
 let ship;
-let missiles = [], bullets = [], particles = [], stars = [], trails = [], powerups = [], shockwaves = [], floatingTexts = [], meteors = [];
+let missiles = [], bullets = [], particles = [], stars = [], trails = [], powerups = [], shockwaves = [], floatingTexts = [], meteors = [], enemyJets = [];
 let gameActive = false, gameStarted = false;
 let score, lives, screenShake, time, wave, waveTimer;
 let glitchEffect = 0, flashEffect = 0, slowMo = 1;
@@ -571,6 +571,7 @@ function init(full = false) {
         shockwaves = [];
         floatingTexts = [];
         meteors = [];
+        enemyJets = [];
         stars = [];
         nebulae = [];
 
@@ -603,8 +604,8 @@ function nextWave() {
     el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), 2500);
 
-    const baseCount = 2 + wave;
-    const count = Math.min(baseCount, 10);
+    const baseCount = 1 + Math.ceil(wave * 0.7);
+    const count = Math.min(baseCount, 7);
 
     for (let i = 0; i < count; i++) {
         setTimeout(() => {
@@ -625,6 +626,16 @@ function nextWave() {
             if (!gameActive) return;
             spawnMissile(0.35, true);
         }, 1500 + i * 2000 + Math.random() * 1500);
+    }
+
+    if (wave >= 2) {
+        const jetCount = Math.min(Math.floor(wave / 2), 3);
+        for (let i = 0; i < jetCount; i++) {
+            setTimeout(() => {
+                if (!gameActive) return;
+                spawnEnemyJet();
+            }, 2000 + i * 2500 + Math.random() * 1500);
+        }
     }
 
     const meteorCount = Math.min(1 + Math.floor(wave / 2), 4);
@@ -653,7 +664,7 @@ function spawnMeteor() {
     const targetX = canvas.width * (0.2 + Math.random() * 0.6);
     const targetY = canvas.height * (0.2 + Math.random() * 0.6);
     const angle = Math.atan2(targetY - y, targetX - x);
-    const speed = 1.2 + Math.random() * 1.5 + wave * 0.05;
+    const speed = 0.5 + Math.random() * 0.7 + wave * 0.02;
     const size = 12 + Math.random() * 20;
 
     meteors.push({
@@ -673,8 +684,34 @@ function spawnMeteor() {
     }
 }
 
+function spawnEnemyJet() {
+    const side = Math.floor(Math.random() * 4);
+    let x, y;
+    if (side === 0) { x = -40; y = Math.random() * canvas.height; }
+    else if (side === 1) { x = canvas.width + 40; y = Math.random() * canvas.height; }
+    else if (side === 2) { x = Math.random() * canvas.width; y = -40; }
+    else { x = Math.random() * canvas.width; y = canvas.height + 40; }
+
+    const shipX = ship ? ship.x : canvas.width / 2;
+    const shipY = ship ? ship.y : canvas.height / 2;
+    const angle = Math.atan2(shipY - y, shipX - x);
+    const speed = 1.5 + Math.random() * 0.8 + wave * 0.03;
+
+    enemyJets.push({
+        x, y,
+        xv: Math.cos(angle) * speed,
+        yv: Math.sin(angle) * speed,
+        a: angle,
+        hp: 2,
+        speed,
+        homingStr: 0.015 + wave * 0.001,
+        born: time,
+        trailTimer: 0
+    });
+}
+
 function getWaveMissileCount() {
-    return Math.min(2 + wave, 10);
+    return Math.min(1 + Math.ceil(wave * 0.7), 7);
 }
 
 function spawnMissile(scale = 1, isHealth = false) {
@@ -1155,6 +1192,85 @@ function update() {
             }
         }
 
+        // Enemy Jets
+        for (let i = enemyJets.length - 1; i >= 0; i--) {
+            const ej = enemyJets[i];
+
+            // Homing toward player
+            const targetA = Math.atan2(ship.y - ej.y, ship.x - ej.x);
+            let aDiff = targetA - ej.a;
+            while (aDiff > Math.PI) aDiff -= Math.PI * 2;
+            while (aDiff < -Math.PI) aDiff += Math.PI * 2;
+            ej.a += aDiff * ej.homingStr * dt;
+
+            ej.xv = Math.cos(ej.a) * ej.speed;
+            ej.yv = Math.sin(ej.a) * ej.speed;
+            ej.x += ej.xv * dt;
+            ej.y += ej.yv * dt;
+
+            // Trail
+            ej.trailTimer++;
+            if (ej.trailTimer % 4 === 0) {
+                trails.push({
+                    x: ej.x - Math.cos(ej.a) * 16,
+                    y: ej.y - Math.sin(ej.a) * 16,
+                    size: 3 + Math.random() * 2,
+                    life: 1.0,
+                    decay: 0.025
+                });
+            }
+
+            // Off-screen cleanup
+            const margin = 400;
+            if ((ej.x < -margin || ej.x > canvas.width + margin || ej.y < -margin || ej.y > canvas.height + margin) && time - ej.born > 120) {
+                enemyJets.splice(i, 1);
+                continue;
+            }
+
+            // Bullet-jet collision
+            for (let bi = bullets.length - 1; bi >= 0; bi--) {
+                const b = bullets[bi];
+                if (Math.hypot(b.x - ej.x, b.y - ej.y) < 22) {
+                    ej.hp--;
+                    createExplosion(b.x, b.y, '#44ff88', 8, 2);
+                    playSound('hit');
+                    bullets.splice(bi, 1);
+
+                    if (ej.hp <= 0) {
+                        score += 500;
+                        createExplosion(ej.x, ej.y, '#44ff88', 25, 4);
+                        createExplosion(ej.x, ej.y, '#88ffaa', 15, 3);
+                        createExplosion(ej.x, ej.y, '#ffffff', 10, 2, true);
+                        createShockwave(ej.x, ej.y, 70, 'rgba(68,255,136,');
+                        floatingTexts.push({ x: ej.x, y: ej.y - 15, text: '🛡️', life: 1.0, yv: -1.5, size: 28 });
+                        shieldActive = true;
+                        shieldTimer = 400;
+                        playSound('powerup');
+                        enemyJets.splice(i, 1);
+                        updateUI();
+                    }
+                    break;
+                }
+            }
+            if (!enemyJets[i] || enemyJets[i] !== ej) continue;
+
+            // Ship-jet collision
+            if (ship.blinkTime === 0 && Math.hypot(ship.x - ej.x, ship.y - ej.y) < ship.r * 0.7 + 18) {
+                if (shieldActive) {
+                    createExplosion(ej.x, ej.y, COLORS.shieldBlue, 25, 4);
+                    createShockwave(ship.x, ship.y, 60, 'rgba(68,136,255,');
+                    playSound('explode');
+                    screenShake = 12;
+                } else {
+                    floatingTexts.push({ x: ej.x, y: ej.y - 15, text: '💀', life: 1.0, yv: -1.8, size: 28 });
+                    takeDamage();
+                }
+                createExplosion(ej.x, ej.y, '#44ff88', 20, 3);
+                createExplosion(ej.x, ej.y, '#ffffff', 10, 2, true);
+                enemyJets.splice(i, 1);
+            }
+        }
+
         // Powerups
         for (let i = powerups.length - 1; i >= 0; i--) {
             const p = powerups[i];
@@ -1434,6 +1550,71 @@ function draw() {
             ctx.stroke();
         }
         ctx.globalCompositeOperation = 'source-over';
+        ctx.restore();
+    });
+
+    // Enemy Jets
+    enemyJets.forEach(ej => {
+        ctx.save();
+        ctx.translate(ej.x, ej.y);
+        ctx.rotate(-ej.a + Math.PI / 2);
+
+        const jr = 16;
+
+        // Engine glow
+        const flicker = 0.7 + Math.random() * 0.3;
+        const fh = jr * (0.8 + Math.random() * 0.6);
+        const eGrad = ctx.createLinearGradient(0, jr * 0.4, 0, jr * 0.4 + fh);
+        eGrad.addColorStop(0, `rgba(100,255,150,${0.8 * flicker})`);
+        eGrad.addColorStop(0.4, `rgba(50,200,80,${0.4 * flicker})`);
+        eGrad.addColorStop(1, 'transparent');
+        ctx.fillStyle = eGrad;
+        ctx.beginPath();
+        ctx.moveTo(-jr * 0.18, jr * 0.45);
+        ctx.quadraticCurveTo(0, jr * 0.45 + fh * 0.8, 0, jr * 0.45 + fh);
+        ctx.quadraticCurveTo(0, jr * 0.45 + fh * 0.8, jr * 0.18, jr * 0.45);
+        ctx.fill();
+
+        // Body
+        const bGrad = ctx.createLinearGradient(-jr, 0, jr, 0);
+        bGrad.addColorStop(0, '#0a2a15');
+        bGrad.addColorStop(0.3, '#1a4a28');
+        bGrad.addColorStop(0.5, '#256636');
+        bGrad.addColorStop(0.7, '#1a4a28');
+        bGrad.addColorStop(1, '#0a2a15');
+        ctx.fillStyle = bGrad;
+
+        ctx.beginPath();
+        ctx.moveTo(0, -jr * 0.9);
+        ctx.lineTo(-jr * 0.07, -jr * 0.35);
+        ctx.lineTo(-jr * 0.15, -jr * 0.1);
+        ctx.lineTo(-jr * 0.85, jr * 0.25);
+        ctx.lineTo(-jr * 0.9, jr * 0.35);
+        ctx.lineTo(-jr * 0.2, jr * 0.28);
+        ctx.lineTo(-jr * 0.25, jr * 0.45);
+        ctx.lineTo(-jr * 0.4, jr * 0.65);
+        ctx.lineTo(-jr * 0.04, jr * 0.55);
+        ctx.lineTo(jr * 0.04, jr * 0.55);
+        ctx.lineTo(jr * 0.4, jr * 0.65);
+        ctx.lineTo(jr * 0.25, jr * 0.45);
+        ctx.lineTo(jr * 0.2, jr * 0.28);
+        ctx.lineTo(jr * 0.9, jr * 0.35);
+        ctx.lineTo(jr * 0.85, jr * 0.25);
+        ctx.lineTo(jr * 0.15, -jr * 0.1);
+        ctx.lineTo(jr * 0.07, -jr * 0.35);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(68,255,136,0.35)';
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+
+        // Cockpit
+        ctx.fillStyle = 'rgba(68,255,136,0.6)';
+        ctx.beginPath();
+        ctx.ellipse(0, -jr * 0.3, jr * 0.06, jr * 0.18, 0, 0, Math.PI * 2);
+        ctx.fill();
+
         ctx.restore();
     });
 
@@ -1962,6 +2143,20 @@ function draw() {
                 ctx.fillStyle = m.isHealth ? '#ff66aa' : COLORS.missileRed;
                 ctx.beginPath();
                 ctx.arc(mx, my, 1.5 + m.scale * 0.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        });
+
+        // Enemy jet dots
+        enemyJets.forEach(ej => {
+            const ejx = radarX + (ej.x / canvas.width) * radarSize;
+            const ejy = radarY + (ej.y / canvas.height) * radarSize;
+            const dx = ejx - (radarX + radarSize / 2);
+            const dy = ejy - (radarY + radarSize / 2);
+            if (Math.hypot(dx, dy) < radarSize / 2) {
+                ctx.fillStyle = '#44ff88';
+                ctx.beginPath();
+                ctx.arc(ejx, ejy, 2, 0, Math.PI * 2);
                 ctx.fill();
             }
         });
