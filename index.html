@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>יירוט טילים - מהדורת המלחמה המודרנית</title>
+    <title>נלחמים בטילים הבליסטיים</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
@@ -335,8 +335,8 @@
     <div class="scanline-overlay"></div>
 
     <div id="start-screen">
-        <h1>יירוט טילים</h1>
-        <div class="start-sub">מהדורת המלחמה המודרנית</div>
+        <h1>נלחמים בטילים הבליסטיים</h1>
+        <div class="start-sub">מהדורת הקרב</div>
         <button ontouchstart="startGame(); event.preventDefault();" onclick="startGame()">התחל משימה</button>
         <div class="controls-info desktop-only">
             <div class="key-hint"><kbd>←→</kbd> סיבוב</div>
@@ -355,7 +355,7 @@
                 <div id="score-val" class="value">000000</div>
             </div>
             <div class="hud-bracket" id="wave-bracket">
-                <div class="label">גל</div>
+                <div class="label">מערכה</div>
                 <div id="wave-val" class="value" style="color: var(--afterburner); text-shadow: 0 0 15px var(--afterburner);">01</div>
             </div>
             <div class="hud-bracket" id="hull-bracket">
@@ -366,7 +366,7 @@
     </div>
 
     <div id="wave-display">
-        <div class="wave-num" id="wave-text">גל 01</div>
+        <div class="wave-num" id="wave-text">מערכה 01</div>
         <div class="wave-sub">טילים מתקרבים</div>
     </div>
 
@@ -376,7 +376,7 @@
         <h2>ההגנה נפרצה</h2>
         <div class="stats-grid">
             <div class="stat-item"><div class="stat-label">ניקוד</div><div class="stat-val" id="final-score">0</div></div>
-            <div class="stat-item"><div class="stat-label">גל</div><div class="stat-val" id="final-wave">0</div></div>
+            <div class="stat-item"><div class="stat-label">מערכה</div><div class="stat-val" id="final-wave">0</div></div>
             <div class="stat-item"><div class="stat-label">יירוטים</div><div class="stat-val" id="final-kills">0</div></div>
             <div class="stat-item"><div class="stat-label">קומבו מקסימלי</div><div class="stat-val" id="final-combo">0</div></div>
         </div>
@@ -600,7 +600,7 @@ function nextWave() {
     waveStartTime = time;
     waveTimer = 120;
     const el = document.getElementById('wave-display');
-    document.getElementById('wave-text').innerText = `גל ${wave.toString().padStart(2,'0')}`;
+    document.getElementById('wave-text').innerText = `מערכה ${wave.toString().padStart(2,'0')}`;
     el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), 2500);
 
