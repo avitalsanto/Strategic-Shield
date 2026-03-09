@@ -692,10 +692,10 @@ function spawnEnemyJet() {
     else if (side === 2) { x = Math.random() * canvas.width; y = -40; }
     else { x = Math.random() * canvas.width; y = canvas.height + 40; }
 
-    const shipX = ship ? ship.x : canvas.width / 2;
-    const shipY = ship ? ship.y : canvas.height / 2;
-    const angle = Math.atan2(shipY - y, shipX - x);
-    const speed = 1.5 + Math.random() * 0.8 + wave * 0.03;
+    const targetX = ship ? ship.x : canvas.width / 2;
+    const targetY = ship ? ship.y : canvas.height / 2;
+    const angle = Math.atan2(targetY - y, targetX - x) + (Math.random() - 0.5) * 0.4;
+    const speed = 0.8 + Math.random() * 0.5 + wave * 0.02;
 
     enemyJets.push({
         x, y,
@@ -704,7 +704,6 @@ function spawnEnemyJet() {
         a: angle,
         hp: 2,
         speed,
-        homingStr: 0.015 + wave * 0.001,
         born: time,
         trailTimer: 0
     });
@@ -1196,15 +1195,7 @@ function update() {
         for (let i = enemyJets.length - 1; i >= 0; i--) {
             const ej = enemyJets[i];
 
-            // Homing toward player
-            const targetA = Math.atan2(ship.y - ej.y, ship.x - ej.x);
-            let aDiff = targetA - ej.a;
-            while (aDiff > Math.PI) aDiff -= Math.PI * 2;
-            while (aDiff < -Math.PI) aDiff += Math.PI * 2;
-            ej.a += aDiff * ej.homingStr * dt;
-
-            ej.xv = Math.cos(ej.a) * ej.speed;
-            ej.yv = Math.sin(ej.a) * ej.speed;
+            ej.a = Math.atan2(ej.yv, ej.xv);
             ej.x += ej.xv * dt;
             ej.y += ej.yv * dt;
 
@@ -1212,8 +1203,8 @@ function update() {
             ej.trailTimer++;
             if (ej.trailTimer % 4 === 0) {
                 trails.push({
-                    x: ej.x - Math.cos(ej.a) * 16,
-                    y: ej.y - Math.sin(ej.a) * 16,
+                    x: ej.x - Math.cos(ej.a) * 22,
+                    y: ej.y - Math.sin(ej.a) * 22,
                     size: 3 + Math.random() * 2,
                     life: 1.0,
                     decay: 0.025
@@ -1230,7 +1221,7 @@ function update() {
             // Bullet-jet collision
             for (let bi = bullets.length - 1; bi >= 0; bi--) {
                 const b = bullets[bi];
-                if (Math.hypot(b.x - ej.x, b.y - ej.y) < 22) {
+                if (Math.hypot(b.x - ej.x, b.y - ej.y) < 26) {
                     ej.hp--;
                     createExplosion(b.x, b.y, '#44ff88', 8, 2);
                     playSound('hit');
@@ -1255,7 +1246,7 @@ function update() {
             if (!enemyJets[i] || enemyJets[i] !== ej) continue;
 
             // Ship-jet collision
-            if (ship.blinkTime === 0 && Math.hypot(ship.x - ej.x, ship.y - ej.y) < ship.r * 0.7 + 18) {
+            if (ship.blinkTime === 0 && Math.hypot(ship.x - ej.x, ship.y - ej.y) < ship.r * 0.7 + 24) {
                 if (shieldActive) {
                     createExplosion(ej.x, ej.y, COLORS.shieldBlue, 25, 4);
                     createShockwave(ship.x, ship.y, 60, 'rgba(68,136,255,');
@@ -1559,60 +1550,78 @@ function draw() {
         ctx.translate(ej.x, ej.y);
         ctx.rotate(-ej.a + Math.PI / 2);
 
-        const jr = 16;
+        const r = 24;
 
-        // Engine glow
-        const flicker = 0.7 + Math.random() * 0.3;
-        const fh = jr * (0.8 + Math.random() * 0.6);
-        const eGrad = ctx.createLinearGradient(0, jr * 0.4, 0, jr * 0.4 + fh);
-        eGrad.addColorStop(0, `rgba(100,255,150,${0.8 * flicker})`);
-        eGrad.addColorStop(0.4, `rgba(50,200,80,${0.4 * flicker})`);
-        eGrad.addColorStop(1, 'transparent');
-        ctx.fillStyle = eGrad;
+        // Engine fire
+        const fireH = r * (1.0 + Math.random() * 0.8);
+        const fGrad = ctx.createLinearGradient(0, r * 0.5, 0, r * 0.5 + fireH);
+        fGrad.addColorStop(0, 'rgba(180,255,200,0.9)');
+        fGrad.addColorStop(0.2, 'rgba(68,220,100,0.7)');
+        fGrad.addColorStop(0.5, 'rgba(30,180,60,0.3)');
+        fGrad.addColorStop(1, 'transparent');
+        ctx.fillStyle = fGrad;
         ctx.beginPath();
-        ctx.moveTo(-jr * 0.18, jr * 0.45);
-        ctx.quadraticCurveTo(0, jr * 0.45 + fh * 0.8, 0, jr * 0.45 + fh);
-        ctx.quadraticCurveTo(0, jr * 0.45 + fh * 0.8, jr * 0.18, jr * 0.45);
+        ctx.moveTo(-r * 0.22, r * 0.55);
+        ctx.quadraticCurveTo(-r * 0.08, r * 0.55 + fireH * 0.7, 0, r * 0.55 + fireH);
+        ctx.quadraticCurveTo(r * 0.08, r * 0.55 + fireH * 0.7, r * 0.22, r * 0.55);
         ctx.fill();
 
-        // Body
-        const bGrad = ctx.createLinearGradient(-jr, 0, jr, 0);
-        bGrad.addColorStop(0, '#0a2a15');
-        bGrad.addColorStop(0.3, '#1a4a28');
-        bGrad.addColorStop(0.5, '#256636');
-        bGrad.addColorStop(0.7, '#1a4a28');
-        bGrad.addColorStop(1, '#0a2a15');
-        ctx.fillStyle = bGrad;
+        // Hull - same shape as player but green
+        const hullGrad = ctx.createLinearGradient(-r, -r * 0.5, r, r * 0.5);
+        hullGrad.addColorStop(0, '#0a200a');
+        hullGrad.addColorStop(0.25, '#163a18');
+        hullGrad.addColorStop(0.5, '#2a6e30');
+        hullGrad.addColorStop(0.75, '#163a18');
+        hullGrad.addColorStop(1, '#0a200a');
+        ctx.fillStyle = hullGrad;
 
         ctx.beginPath();
-        ctx.moveTo(0, -jr * 0.9);
-        ctx.lineTo(-jr * 0.07, -jr * 0.35);
-        ctx.lineTo(-jr * 0.15, -jr * 0.1);
-        ctx.lineTo(-jr * 0.85, jr * 0.25);
-        ctx.lineTo(-jr * 0.9, jr * 0.35);
-        ctx.lineTo(-jr * 0.2, jr * 0.28);
-        ctx.lineTo(-jr * 0.25, jr * 0.45);
-        ctx.lineTo(-jr * 0.4, jr * 0.65);
-        ctx.lineTo(-jr * 0.04, jr * 0.55);
-        ctx.lineTo(jr * 0.04, jr * 0.55);
-        ctx.lineTo(jr * 0.4, jr * 0.65);
-        ctx.lineTo(jr * 0.25, jr * 0.45);
-        ctx.lineTo(jr * 0.2, jr * 0.28);
-        ctx.lineTo(jr * 0.9, jr * 0.35);
-        ctx.lineTo(jr * 0.85, jr * 0.25);
-        ctx.lineTo(jr * 0.15, -jr * 0.1);
-        ctx.lineTo(jr * 0.07, -jr * 0.35);
+        ctx.moveTo(0, -r * 1.1);
+        ctx.lineTo(-r * 0.08, -r * 0.5);
+        ctx.lineTo(-r * 0.2, -r * 0.2);
+        ctx.lineTo(-r * 1.15, r * 0.3);
+        ctx.lineTo(-r * 1.2, r * 0.45);
+        ctx.lineTo(-r * 0.3, r * 0.35);
+        ctx.lineTo(-r * 0.35, r * 0.55);
+        ctx.lineTo(-r * 0.6, r * 0.85);
+        ctx.lineTo(-r * 0.05, r * 0.7);
+        ctx.lineTo(r * 0.05, r * 0.7);
+        ctx.lineTo(r * 0.6, r * 0.85);
+        ctx.lineTo(r * 0.35, r * 0.55);
+        ctx.lineTo(r * 0.3, r * 0.35);
+        ctx.lineTo(r * 1.2, r * 0.45);
+        ctx.lineTo(r * 1.15, r * 0.3);
+        ctx.lineTo(r * 0.2, -r * 0.2);
+        ctx.lineTo(r * 0.08, -r * 0.5);
         ctx.closePath();
         ctx.fill();
 
-        ctx.strokeStyle = 'rgba(68,255,136,0.35)';
-        ctx.lineWidth = 0.8;
+        ctx.strokeStyle = 'rgba(68,255,100,0.35)';
+        ctx.lineWidth = 1;
         ctx.stroke();
 
-        // Cockpit
-        ctx.fillStyle = 'rgba(68,255,136,0.6)';
+        // Wing panels
+        ctx.fillStyle = 'rgba(68,255,100,0.04)';
         ctx.beginPath();
-        ctx.ellipse(0, -jr * 0.3, jr * 0.06, jr * 0.18, 0, 0, Math.PI * 2);
+        ctx.moveTo(-r * 0.2, -r * 0.1);
+        ctx.lineTo(-r * 1.0, r * 0.35);
+        ctx.lineTo(-r * 0.3, r * 0.3);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(r * 0.2, -r * 0.1);
+        ctx.lineTo(r * 1.0, r * 0.35);
+        ctx.lineTo(r * 0.3, r * 0.3);
+        ctx.closePath();
+        ctx.fill();
+
+        // Cockpit
+        const cGrad = ctx.createLinearGradient(0, -r * 0.7, 0, -r * 0.1);
+        cGrad.addColorStop(0, 'rgba(68,255,100,0.8)');
+        cGrad.addColorStop(1, 'rgba(30,150,50,0.2)');
+        ctx.fillStyle = cGrad;
+        ctx.beginPath();
+        ctx.ellipse(0, -r * 0.4, r * 0.09, r * 0.28, 0, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.restore();
