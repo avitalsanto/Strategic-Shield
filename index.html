@@ -604,9 +604,9 @@ function nextWave() {
     el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), 2500);
 
-    // Missiles: start very gentle
-    const missileCount = wave <= 2 ? 1 : wave <= 4 ? 2 : Math.min(Math.ceil(wave * 0.5), 5);
-    const spawnDelay = Math.max(350, 700 - wave * 20);
+    // Missiles: start very gentle, ramp up after wave 10
+    const missileCount = wave <= 2 ? 1 : wave <= 4 ? 2 : wave <= 9 ? Math.min(Math.ceil(wave * 0.5), 5) : Math.min(5 + Math.floor((wave - 9) * 0.5), 8);
+    const spawnDelay = Math.max(200, 700 - wave * 25);
 
     for (let i = 0; i < missileCount; i++) {
         setTimeout(() => {
@@ -638,9 +638,9 @@ function nextWave() {
         }, 2500 + i * 3000 + Math.random() * 1500);
     }
 
-    // Enemy jets: start from wave 4
+    // Enemy jets: start from wave 4, up to 3
     if (wave >= 4) {
-        const jetCount = Math.min(Math.floor((wave - 2) / 2), 2);
+        const jetCount = Math.min(Math.floor((wave - 2) / 2), 3);
         for (let i = 0; i < jetCount; i++) {
             setTimeout(() => {
                 if (!gameActive) return;
@@ -649,9 +649,9 @@ function nextWave() {
         }
     }
 
-    // Meteors: start from wave 3, gradual
+    // Meteors: start from wave 3, up to 5
     if (wave >= 3) {
-        const meteorCount = Math.min(Math.floor((wave - 1) / 2), 3);
+        const meteorCount = Math.min(Math.floor((wave - 1) / 2), 5);
         for (let i = 0; i < meteorCount; i++) {
             setTimeout(() => {
                 if (!gameActive) return;
@@ -724,7 +724,7 @@ function spawnEnemyJet() {
 }
 
 function getWaveMissileCount() {
-    return wave <= 2 ? 1 : wave <= 4 ? 2 : Math.min(Math.ceil(wave * 0.5), 5);
+    return wave <= 2 ? 1 : wave <= 4 ? 2 : wave <= 9 ? Math.min(Math.ceil(wave * 0.5), 5) : Math.min(5 + Math.floor((wave - 9) * 0.5), 8);
 }
 
 function spawnMissile(scale = 1, isHealth = false) {
@@ -751,12 +751,12 @@ function spawnMissile(scale = 1, isHealth = false) {
         else flyAngle = toCenterAngle + (Math.random() - 0.5) * 1.8;
     }
 
-    const waveSpeedBonus = Math.min(wave * 0.012, 0.25);
+    const waveSpeedBonus = Math.min(wave * 0.015, 0.5);
     const baseSpeed = isHealth ? 0.4 + Math.random() * 0.25 : 0.4 + Math.random() * 0.3 + waveSpeedBonus;
     const sizeSlowdown = Math.max(0.5, 1.0 - scale * 0.15);
     const spd = baseSpeed * sizeSlowdown;
 
-    const homingBase = isHealth ? 0.001 : (0.002 + Math.min(wave * 0.0003, 0.003));
+    const homingBase = isHealth ? 0.001 : (0.002 + Math.min(wave * 0.0004, 0.006));
 
     missiles.push({
         x, y,
@@ -768,7 +768,7 @@ function spawnMissile(scale = 1, isHealth = false) {
         scale,
         hp: isHealth ? 1 : (scale < 0.6 ? 1 : scale < 1.0 ? 2 : scale < 1.5 ? 3 : 5),
         maxHp: isHealth ? 1 : (scale < 0.6 ? 1 : scale < 1.0 ? 2 : scale < 1.5 ? 3 : 5),
-        homingStr: (isHealth || Math.random() < 0.4) ? 0 : (homingBase + wave * 0.00015),
+        homingStr: (isHealth || Math.random() < Math.max(0.2, 0.4 - wave * 0.02)) ? 0 : (homingBase + wave * 0.0002),
         trailTimer: 0,
         born: time,
         glowPhase: Math.random() * Math.PI * 2,
