@@ -634,7 +634,7 @@ function nextWave() {
     for (let i = 0; i < healthCount; i++) {
         setTimeout(() => {
             if (!gameActive) return;
-            spawnMissile(0.35, true);
+            spawnMissile(0.55, true);
         }, 2500 + i * 3000 + Math.random() * 1500);
     }
 
