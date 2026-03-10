@@ -604,59 +604,59 @@ function nextWave() {
     el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), 2500);
 
-    // Missiles: start gentle, ramp up
-    const missileCount = wave <= 2 ? wave : Math.min(1 + Math.ceil(wave * 0.6), 6);
-    const spawnDelay = Math.max(300, 600 - wave * 20);
+    // Missiles: start very gentle
+    const missileCount = wave <= 2 ? 1 : wave <= 4 ? 2 : Math.min(Math.ceil(wave * 0.5), 5);
+    const spawnDelay = Math.max(350, 700 - wave * 20);
 
     for (let i = 0; i < missileCount; i++) {
         setTimeout(() => {
             if (!gameActive) return;
             const r = Math.random();
             let scale;
-            if (wave <= 2) {
-                scale = 0.4 + Math.random() * 0.3;
-            } else if (wave <= 4) {
-                if (r < 0.5) scale = 0.4 + Math.random() * 0.2;
-                else if (r < 0.85) scale = 0.7 + Math.random() * 0.3;
+            if (wave <= 3) {
+                scale = 0.4 + Math.random() * 0.25;
+            } else if (wave <= 5) {
+                if (r < 0.55) scale = 0.4 + Math.random() * 0.2;
+                else if (r < 0.9) scale = 0.7 + Math.random() * 0.3;
                 else scale = 1.0 + Math.random() * 0.3;
             } else {
                 if (r < 0.4) scale = 0.4 + Math.random() * 0.2;
                 else if (r < 0.75) scale = 0.7 + Math.random() * 0.3;
                 else if (r < 0.93) scale = 1.1 + Math.random() * 0.4;
-                else scale = 1.6 + Math.random() * 0.5;
+                else scale = 1.5 + Math.random() * 0.4;
             }
             spawnMissile(scale);
         }, i * spawnDelay);
     }
 
-    // Health pickups
-    const healthCount = wave <= 1 ? 1 : (Math.random() < 0.6 ? 1 : (wave > 4 ? 2 : 0));
+    // Health pickups - always at least 1
+    const healthCount = wave > 5 ? 2 : 1;
     for (let i = 0; i < healthCount; i++) {
         setTimeout(() => {
             if (!gameActive) return;
             spawnMissile(0.35, true);
-        }, 2000 + i * 2500 + Math.random() * 1500);
+        }, 2500 + i * 3000 + Math.random() * 1500);
     }
 
-    // Enemy jets: start from wave 3
-    if (wave >= 3) {
-        const jetCount = Math.min(Math.floor((wave - 1) / 2), 3);
+    // Enemy jets: start from wave 4
+    if (wave >= 4) {
+        const jetCount = Math.min(Math.floor((wave - 2) / 2), 2);
         for (let i = 0; i < jetCount; i++) {
             setTimeout(() => {
                 if (!gameActive) return;
                 spawnEnemyJet();
-            }, 2500 + i * 3000 + Math.random() * 2000);
+            }, 3000 + i * 3500 + Math.random() * 2000);
         }
     }
 
-    // Meteors: start from wave 2, gradual
-    if (wave >= 2) {
-        const meteorCount = Math.min(Math.floor(wave / 2), 3);
+    // Meteors: start from wave 3, gradual
+    if (wave >= 3) {
+        const meteorCount = Math.min(Math.floor((wave - 1) / 2), 3);
         for (let i = 0; i < meteorCount; i++) {
             setTimeout(() => {
                 if (!gameActive) return;
                 spawnMeteor();
-            }, 1200 + i * 1500 + Math.random() * 1200);
+            }, 1500 + i * 1800 + Math.random() * 1500);
         }
     }
 
@@ -724,7 +724,7 @@ function spawnEnemyJet() {
 }
 
 function getWaveMissileCount() {
-    return wave <= 2 ? wave : Math.min(1 + Math.ceil(wave * 0.6), 6);
+    return wave <= 2 ? 1 : wave <= 4 ? 2 : Math.min(Math.ceil(wave * 0.5), 5);
 }
 
 function spawnMissile(scale = 1, isHealth = false) {
@@ -746,31 +746,29 @@ function spawnMissile(scale = 1, isHealth = false) {
     } else {
         const toPlayerAngle = Math.atan2(shipY - y, shipX - x);
         const r = Math.random();
-        if (r < 0.5) flyAngle = toPlayerAngle + (Math.random() - 0.5) * 0.5;
-        else if (r < 0.8) flyAngle = toCenterAngle + (Math.random() - 0.5) * 0.6;
-        else flyAngle = toCenterAngle + (Math.random() - 0.5) * 1.4;
+        if (r < 0.3) flyAngle = toPlayerAngle + (Math.random() - 0.5) * 0.6;
+        else if (r < 0.6) flyAngle = toCenterAngle + (Math.random() - 0.5) * 0.5;
+        else flyAngle = toCenterAngle + (Math.random() - 0.5) * 1.8;
     }
 
-    const waveSpeedBonus = Math.min(wave * 0.015, 0.3);
-    const baseSpeed = isHealth ? 0.4 + Math.random() * 0.3 : 0.5 + Math.random() * 0.3 + waveSpeedBonus;
+    const waveSpeedBonus = Math.min(wave * 0.012, 0.25);
+    const baseSpeed = isHealth ? 0.4 + Math.random() * 0.25 : 0.4 + Math.random() * 0.3 + waveSpeedBonus;
     const sizeSlowdown = Math.max(0.5, 1.0 - scale * 0.15);
     const spd = baseSpeed * sizeSlowdown;
 
-    const homingBase = isHealth ? 0.002 : (0.003 + Math.min(wave * 0.0005, 0.004));
+    const homingBase = isHealth ? 0.001 : (0.002 + Math.min(wave * 0.0003, 0.003));
 
-    const widthMult = isHealth ? 2.5 : 1;
-    const heightMult = isHealth ? 0.5 : 1;
     missiles.push({
         x, y,
-        w: 14 * scale * widthMult,
-        h: 70 * scale * heightMult,
+        w: 14 * scale,
+        h: 70 * scale,
         xv: Math.cos(flyAngle) * spd,
         yv: Math.sin(flyAngle) * spd,
         a: flyAngle + Math.PI / 2,
         scale,
         hp: isHealth ? 1 : (scale < 0.6 ? 1 : scale < 1.0 ? 2 : scale < 1.5 ? 3 : 5),
         maxHp: isHealth ? 1 : (scale < 0.6 ? 1 : scale < 1.0 ? 2 : scale < 1.5 ? 3 : 5),
-        homingStr: homingBase + wave * 0.0002,
+        homingStr: (isHealth || Math.random() < 0.4) ? 0 : (homingBase + wave * 0.00015),
         trailTimer: 0,
         born: time,
         glowPhase: Math.random() * Math.PI * 2,
@@ -1691,13 +1689,12 @@ function draw() {
         const glow = 0.6 + Math.sin(time * 0.1 + m.glowPhase) * 0.4;
 
         if (m.isHealth) {
-            // Health missile - pink/green glow
             ctx.shadowBlur = 18;
             ctx.shadowColor = `rgba(255, 100, 170, ${glow})`;
-            const flameH = m.h * 0.5 + Math.random() * m.h * 0.2;
+            const flameH = m.h * 0.6 + Math.random() * m.h * 0.3;
             const flameGrad = ctx.createLinearGradient(0, m.h / 2, 0, m.h / 2 + flameH);
-            flameGrad.addColorStop(0, `rgba(255, 150, 200, ${0.9 * glow})`);
-            flameGrad.addColorStop(0.4, `rgba(200, 80, 150, ${0.6 * glow})`);
+            flameGrad.addColorStop(0, `rgba(255, 180, 220, ${0.9 * glow})`);
+            flameGrad.addColorStop(0.3, `rgba(255, 80, 150, ${0.7 * glow})`);
             flameGrad.addColorStop(1, 'transparent');
             ctx.fillStyle = flameGrad;
             ctx.beginPath();
@@ -1709,16 +1706,15 @@ function draw() {
 
             const bodyGrad = ctx.createLinearGradient(-m.w / 2, 0, m.w / 2, 0);
             bodyGrad.addColorStop(0, '#3a1a2a');
-            bodyGrad.addColorStop(0.3, '#6a3050');
-            bodyGrad.addColorStop(0.5, '#884466');
-            bodyGrad.addColorStop(0.7, '#6a3050');
+            bodyGrad.addColorStop(0.3, '#7a3060');
+            bodyGrad.addColorStop(0.5, '#aa5580');
+            bodyGrad.addColorStop(0.7, '#7a3060');
             bodyGrad.addColorStop(1, '#3a1a2a');
             ctx.fillStyle = bodyGrad;
             ctx.beginPath();
             ctx.rect(-m.w / 2, -m.h / 2, m.w, m.h);
             ctx.fill();
 
-            // Heart on warhead
             ctx.fillStyle = '#ff4488';
             ctx.beginPath();
             ctx.moveTo(-m.w / 2, -m.h / 2);
@@ -1726,13 +1722,12 @@ function draw() {
             ctx.quadraticCurveTo(m.w * 0.3, -m.h / 2 - m.w * 1.8, m.w / 2, -m.h / 2);
             ctx.fill();
 
-            ctx.shadowBlur = 14 * glow;
+            ctx.shadowBlur = 12 * glow;
             ctx.shadowColor = '#ff4488';
-            ctx.strokeStyle = `rgba(255,68,136,${0.5 * glow})`;
+            ctx.strokeStyle = `rgba(255,68,136,${0.4 * glow})`;
             ctx.lineWidth = 1;
             ctx.stroke();
             ctx.shadowBlur = 0;
-
 
         } else {
             // Regular missile
