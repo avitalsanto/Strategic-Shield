@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <title>נלחמים בטילים הבליסטיים</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Heebo:wght@400;700;900&display=swap');
 
         :root {
             --neon-blue: #00f2ff;
@@ -34,7 +34,7 @@
         body {
             background: var(--deep-space);
             color: #fff;
-            font-family: 'Orbitron', sans-serif;
+            font-family: 'Heebo', 'Orbitron', sans-serif;
             position: fixed;
             inset: 0;
         }
@@ -88,14 +88,16 @@
         }
 
         .label {
-            font-size: 7px;
-            letter-spacing: 2px;
+            font-family: 'Heebo', sans-serif;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1px;
             color: rgba(0,242,255,0.7);
             margin-bottom: 2px;
-            text-transform: uppercase;
         }
 
         .value {
+            font-family: 'Orbitron', 'Heebo', sans-serif;
             font-size: 18px;
             font-weight: 900;
             text-shadow: 0 0 15px var(--neon-blue);
@@ -104,7 +106,7 @@
         @media (min-width: 768px) {
             #hud { padding: 20px 30px; }
             .hud-bracket { padding: 10px 20px; }
-            .label { font-size: 9px; letter-spacing: 4px; margin-bottom: 4px; }
+            .label { font-size: 11px; margin-bottom: 4px; }
             .value { font-size: 26px; }
         }
 
@@ -124,18 +126,21 @@
         }
 
         #wave-display .wave-num {
-            font-size: clamp(40px, 12vw, 80px);
+            font-family: 'Heebo', sans-serif;
+            font-size: clamp(36px, 11vw, 72px);
             font-weight: 900;
             color: var(--neon-blue);
             text-shadow: 0 0 60px var(--neon-blue), 0 0 120px rgba(0,242,255,0.3);
-            letter-spacing: 6px;
+            letter-spacing: 3px;
         }
 
         #wave-display .wave-sub {
-            font-size: clamp(10px, 3vw, 14px);
-            letter-spacing: 5px;
+            font-family: 'Heebo', sans-serif;
+            font-size: clamp(12px, 3.5vw, 16px);
+            font-weight: 700;
+            letter-spacing: 3px;
             color: rgba(0,242,255,0.6);
-            margin-top: 8px;
+            margin-top: 10px;
         }
 
         #combo-display {
@@ -146,6 +151,7 @@
             opacity: 0;
             pointer-events: none;
             z-index: 15;
+            font-family: 'Heebo', sans-serif;
             font-size: clamp(24px, 7vw, 36px);
             font-weight: 900;
             color: var(--afterburner);
@@ -170,11 +176,13 @@
         }
 
         #start-screen h1 {
-            font-size: clamp(24px, 7vw, 64px);
+            font-family: 'Heebo', sans-serif;
+            font-size: clamp(26px, 7vw, 60px);
             font-weight: 900;
             color: var(--neon-blue);
             text-shadow: 0 0 40px var(--neon-blue), 0 0 80px rgba(0,242,255,0.3);
-            letter-spacing: clamp(3px, 1vw, 6px);
+            letter-spacing: clamp(1px, 0.3vw, 3px);
+            line-height: 1.3;
             text-align: center;
             animation: titlePulse 3s ease-in-out infinite;
         }
@@ -185,8 +193,10 @@
         }
 
         .start-sub {
-            font-size: clamp(9px, 2.5vw, 12px);
-            letter-spacing: clamp(3px, 1vw, 6px);
+            font-family: 'Heebo', sans-serif;
+            font-size: clamp(11px, 3vw, 15px);
+            font-weight: 700;
+            letter-spacing: clamp(2px, 0.8vw, 5px);
             color: rgba(255,255,255,0.4);
             text-align: center;
         }
@@ -210,9 +220,11 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            font-size: clamp(9px, 2.5vw, 11px);
+            font-family: 'Heebo', sans-serif;
+            font-size: clamp(11px, 3vw, 14px);
+            font-weight: 700;
             color: rgba(255,255,255,0.5);
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
         .key-hint kbd {
@@ -221,7 +233,7 @@
             padding: 3px 8px;
             border-radius: 3px;
             color: var(--neon-blue);
-            font-family: 'Orbitron';
+            font-family: 'Orbitron', monospace;
             font-size: 9px;
         }
 
@@ -241,10 +253,12 @@
         }
 
         #game-over h2 {
-            font-size: clamp(20px, 6vw, 32px);
+            font-family: 'Heebo', sans-serif;
+            font-size: clamp(22px, 6vw, 34px);
+            font-weight: 900;
             color: var(--neon-pink);
             margin: 0 0 8px 0;
-            letter-spacing: clamp(3px, 1vw, 6px);
+            letter-spacing: clamp(1px, 0.5vw, 3px);
             text-shadow: 0 0 30px var(--neon-pink);
         }
 
@@ -257,12 +271,15 @@
         }
 
         .stat-item .stat-label {
-            font-size: clamp(7px, 2vw, 9px);
-            letter-spacing: 2px;
+            font-family: 'Heebo', sans-serif;
+            font-size: clamp(9px, 2.5vw, 12px);
+            font-weight: 700;
+            letter-spacing: 1px;
             color: rgba(255,255,255,0.4);
         }
 
         .stat-item .stat-val {
+            font-family: 'Orbitron', 'Heebo', sans-serif;
             font-size: clamp(16px, 4vw, 20px);
             font-weight: 900;
             color: var(--neon-blue);
@@ -274,13 +291,12 @@
             color: var(--neon-blue);
             border: 1px solid var(--neon-blue);
             padding: 14px 40px;
-            font-size: 13px;
-            letter-spacing: 3px;
+            font-family: 'Heebo', sans-serif;
+            font-size: 15px;
+            font-weight: 900;
+            letter-spacing: 2px;
             cursor: pointer;
             transition: 0.3s;
-            text-transform: uppercase;
-            font-family: 'Orbitron';
-            font-weight: 700;
             pointer-events: auto;
             clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
             position: relative;
@@ -598,15 +614,15 @@ function nextWave() {
     wave++;
     missilesDead = 0;
     waveStartTime = time;
-    waveTimer = 120;
+    waveTimer = 240;
     const el = document.getElementById('wave-display');
     document.getElementById('wave-text').innerText = `מערכה ${wave.toString().padStart(2,'0')}`;
     el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), 2500);
 
     // Missiles: start very gentle, ramp up after wave 10
-    const missileCount = wave <= 2 ? 1 : wave <= 4 ? 2 : wave <= 9 ? Math.min(Math.ceil(wave * 0.5), 5) : Math.min(5 + Math.floor((wave - 9) * 0.5), 8);
-    const spawnDelay = Math.max(200, 700 - wave * 25);
+    const missileCount = wave <= 2 ? 2 : wave <= 4 ? 3 : wave <= 9 ? Math.min(Math.ceil(wave * 0.5), 5) : Math.min(5 + Math.floor((wave - 9) * 0.5), 8);
+    const spawnDelay = Math.max(300, 900 - wave * 30);
 
     for (let i = 0; i < missileCount; i++) {
         setTimeout(() => {
@@ -635,7 +651,7 @@ function nextWave() {
         setTimeout(() => {
             if (!gameActive) return;
             spawnMissile(0.55, true);
-        }, 2500 + i * 3000 + Math.random() * 1500);
+        }, 3500 + i * 3500 + Math.random() * 2000);
     }
 
     // Enemy jets: start from wave 4, up to 3
@@ -645,18 +661,18 @@ function nextWave() {
             setTimeout(() => {
                 if (!gameActive) return;
                 spawnEnemyJet();
-            }, 3000 + i * 3500 + Math.random() * 2000);
+            }, 4000 + i * 4000 + Math.random() * 2500);
         }
     }
 
-    // Meteors: start from wave 3, up to 5
-    if (wave >= 3) {
+    // Meteors: start from wave 2, up to 5
+    if (wave >= 2) {
         const meteorCount = Math.min(Math.floor((wave - 1) / 2), 5);
         for (let i = 0; i < meteorCount; i++) {
             setTimeout(() => {
                 if (!gameActive) return;
                 spawnMeteor();
-            }, 1500 + i * 1800 + Math.random() * 1500);
+            }, 2500 + i * 2500 + Math.random() * 2000);
         }
     }
 
@@ -724,7 +740,7 @@ function spawnEnemyJet() {
 }
 
 function getWaveMissileCount() {
-    return wave <= 2 ? 1 : wave <= 4 ? 2 : wave <= 9 ? Math.min(Math.ceil(wave * 0.5), 5) : Math.min(5 + Math.floor((wave - 9) * 0.5), 8);
+    return wave <= 2 ? 2 : wave <= 4 ? 3 : wave <= 9 ? Math.min(Math.ceil(wave * 0.5), 5) : Math.min(5 + Math.floor((wave - 9) * 0.5), 8);
 }
 
 function spawnMissile(scale = 1, isHealth = false) {
@@ -1122,7 +1138,7 @@ function update() {
                         updateUI();
 
                         if (missilesDead >= getWaveMissileCount() && missiles.length === 0) {
-                            setTimeout(() => { if (missiles.length === 0 && gameActive) nextWave(); }, 1800);
+                            setTimeout(() => { if (missiles.length === 0 && gameActive) nextWave(); }, 3000);
                         }
                     }
                     break;
@@ -1138,7 +1154,7 @@ function update() {
                     missiles.splice(i, 1);
                     takeDamage();
                     if (missilesDead >= getWaveMissileCount() && missiles.length === 0) {
-                        setTimeout(() => { if (missiles.length === 0 && gameActive) nextWave(); }, 1800);
+                        setTimeout(() => { if (missiles.length === 0 && gameActive) nextWave(); }, 3000);
                     }
                 } else if (ship.blinkTime === 0) {
                     if (shieldActive) {
@@ -1282,12 +1298,21 @@ function update() {
             p.pulse += 0.05;
             if (p.life <= 0) { powerups.splice(i, 1); continue; }
 
-            if (Math.hypot(ship.x - p.x, ship.y - p.y) < 40) {
+            let collected = false;
+            for (let j = bullets.length - 1; j >= 0; j--) {
+                if (Math.hypot(bullets[j].x - p.x, bullets[j].y - p.y) < 35) {
+                    bullets.splice(j, 1);
+                    collected = true;
+                    break;
+                }
+            }
+            if (collected) {
                 if (p.type === 'shield') { shieldActive = true; shieldTimer = 600; }
                 else if (p.type === 'rapid') { rapidFire = true; rapidFireTimer = 500; }
                 else if (p.type === 'spread') { spreadShot = true; spreadShotTimer = 400; }
                 playSound('powerup');
                 createExplosion(p.x, p.y, COLORS.neonBlue, 20, 4);
+                floatingTexts.push({ x: p.x, y: p.y - 15, text: p.type === 'shield' ? '🛡️' : p.type === 'rapid' ? '⚡' : '✦', life: 1.0, yv: -1.8, size: 28 });
                 powerups.splice(i, 1);
             }
         }
@@ -1343,12 +1368,12 @@ function update() {
                 missiles.splice(i, 1);
                 missilesDead++;
                 if (missilesDead >= getWaveMissileCount() && missiles.length === 0) {
-                    setTimeout(() => { if (missiles.length === 0 && gameActive) nextWave(); }, 1200);
+                    setTimeout(() => { if (missiles.length === 0 && gameActive) nextWave(); }, 2500);
                 }
             }
         }
 
-        if (waveStartTime > 0 && time - waveStartTime > 1200 && missiles.length === 0 && waveTimer <= 0) {
+        if (waveStartTime > 0 && time - waveStartTime > 1800 && missiles.length === 0 && waveTimer <= 0) {
             waveStartTime = 0;
             nextWave();
         }
